@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.print.attribute.standard.Media;
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/pdf")
@@ -20,7 +21,7 @@ public class PdfGeneratorController {
     }
 
     @GetMapping("/itext/{imageId}")
-    public ResponseEntity<byte[]> GenerateItextPdf(@PathVariable int imageId, @RequestBody CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException {
+    public ResponseEntity<byte[]> GenerateItextPdf(@PathVariable int imageId, @RequestBody CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
         byte[] pdf = pdfService.generateItextPdf(imageId, companyInfoRequestDto);
 
         return ResponseEntity.ok()
