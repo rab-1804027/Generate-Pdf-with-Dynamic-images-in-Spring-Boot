@@ -1,18 +1,14 @@
 package com.bappi.pdfgeneratorapplication.service;
 
-import com.bappi.pdfgeneratorapplication.dto.CompanyInfoRequestDto;
 import com.bappi.pdfgeneratorapplication.utils.ImageUtils;
-import com.itextpdf.text.*;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Image;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfStamper;
-import com.itextpdf.text.pdf.PdfWriter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDFontFactory;
-import org.apache.pdfbox.pdmodel.font.PDType1CFont;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -22,7 +18,7 @@ import java.io.InputStream;
 @Service
 public class PdfService {
 
-    public byte[] generatePdfUsingItext(Integer imageId) throws DocumentException, IOException {
+    public byte[] integratingImageToPdfUsingItextLibrary(Integer imageId) throws DocumentException, IOException {
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -32,7 +28,7 @@ public class PdfService {
         InputStream imageStream = ImageUtils.getImageStream(imageId);
         Image image = Image.getInstance(imageStream.readAllBytes());
         image.scaleToFit(100, 100);
-        image.setAbsolutePosition(500, 720);
+        image.setAbsolutePosition(50, 720);
         pdfStamper.getOverContent(1).addImage(image);
 
         pdfStamper.close();
@@ -42,18 +38,26 @@ public class PdfService {
 
     }
 
-    public byte[] generatePdfUsingApachePdfbox(Integer imageId, CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
-        PDDocument document = new PDDocument();
-        PDPage page = new PDPage();
-        document.addPage(page);
+    public byte[] integratingImageToPdfUsingApachePdfboxLibrary(Integer imageId) throws IOException {
 
-        PDPageContentStream contentStream = new PDPageContentStream(document, page);
-        contentStream.beginText();
-        contentStream.setFont(PDType1Font.TIMES_ROMAN,12);
-        contentStream.endText();
+        InputStream pdfInputStream = getClass().getResourceAsStream("/test.pdf");
+        PDDocument document = PDDocument.load(pdfInputStream);
+
+        InputStream imageStream = ImageUtils.getImageStream(imageId);
+        PDImageXObject image = PDImageXObject.createFromByteArray(document, imageStream.readAllBytes(), "image");
+
+        PDPage page = document.getPage(0);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page, PDPageContentStream.AppendMode.APPEND, true);
+
+        contentStream.drawImage(image, 450, 720, 100, 100);
+
+        contentStream.close();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         document.save(outputStream);
+        document.close();
+
         return outputStream.toByteArray();
 
     }

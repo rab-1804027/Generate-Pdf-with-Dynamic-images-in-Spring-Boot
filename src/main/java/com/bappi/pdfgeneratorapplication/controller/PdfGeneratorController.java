@@ -22,7 +22,7 @@ public class PdfGeneratorController {
 
     @GetMapping("/itext/{imageId}")
     public ResponseEntity<byte[]> generateItextPdf(@PathVariable int imageId) throws DocumentException, IOException {
-        byte[] pdf = pdfService.generatePdfUsingItext(imageId);
+        byte[] pdf = pdfService.integratingImageToPdfUsingItextLibrary(imageId);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
@@ -31,8 +31,8 @@ public class PdfGeneratorController {
     }
 
     @GetMapping("/pdfbox/{imageId}")
-    public ResponseEntity<byte[]> generateApachePdfBox(@PathVariable int imageId, @RequestBody CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
-        byte[] pdf = pdfService.generatePdfUsingApachePdfbox(imageId, companyInfoRequestDto);
+    public ResponseEntity<byte[]> generateApachePdfBox(@PathVariable int imageId) throws IOException {
+        byte[] pdf = pdfService.integratingImageToPdfUsingApachePdfboxLibrary(imageId);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
