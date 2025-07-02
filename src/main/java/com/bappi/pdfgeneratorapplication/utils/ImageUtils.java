@@ -4,8 +4,8 @@ import java.io.InputStream;
 
 public class ImageUtils {
 
-    public static InputStream getImageStream(String companyShortName, int imageId){
-        String image = companyShortName+imageId+".jpeg";
+    public static InputStream getImageStream(int imageId){
+        String image = "dsi"+imageId+".jpeg";
         return ImageUtils.class.getResourceAsStream("/static/images/"+image);
     }
 }

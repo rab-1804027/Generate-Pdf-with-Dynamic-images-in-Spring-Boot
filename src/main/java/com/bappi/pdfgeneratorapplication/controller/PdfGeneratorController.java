@@ -21,12 +21,22 @@ public class PdfGeneratorController {
     }
 
     @GetMapping("/itext/{imageId}")
-    public ResponseEntity<byte[]> GenerateItextPdf(@PathVariable int imageId, @RequestBody CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
-        byte[] pdf = pdfService.generateItextPdf(imageId, companyInfoRequestDto);
+    public ResponseEntity<byte[]> generateItextPdf(@PathVariable int imageId) throws DocumentException, IOException {
+        byte[] pdf = pdfService.generatePdfUsingItext(imageId);
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header("Content-Disposition", "inline; filename=itext.pdf")
+                .body(pdf);
+    }
+
+    @GetMapping("/pdfbox/{imageId}")
+    public ResponseEntity<byte[]> generateApachePdfBox(@PathVariable int imageId, @RequestBody CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
+        byte[] pdf = pdfService.generatePdfUsingApachePdfbox(imageId, companyInfoRequestDto);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header("Content-Disposition", "inline; filename=apache.pdf")
                 .body(pdf);
     }
 }

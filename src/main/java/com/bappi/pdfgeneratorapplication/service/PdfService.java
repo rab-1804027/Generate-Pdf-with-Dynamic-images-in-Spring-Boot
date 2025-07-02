@@ -3,7 +3,16 @@ package com.bappi.pdfgeneratorapplication.service;
 import com.bappi.pdfgeneratorapplication.dto.CompanyInfoRequestDto;
 import com.bappi.pdfgeneratorapplication.utils.ImageUtils;
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.PdfWriter;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDFontFactory;
+import org.apache.pdfbox.pdmodel.font.PDType1CFont;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -13,40 +22,39 @@ import java.io.InputStream;
 @Service
 public class PdfService {
 
-    public byte[] generateItextPdf(Integer imageId, CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
+    public byte[] generatePdfUsingItext(Integer imageId) throws DocumentException, IOException {
 
-        Document document = new Document();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-        PdfWriter.getInstance(document, outputStream);
+        PdfReader pdfReader = new PdfReader(getClass().getResourceAsStream("/test.pdf"));
+        PdfStamper pdfStamper = new PdfStamper(pdfReader, outputStream);
 
-        document.open();
-
-        Font font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
-        Paragraph title = new Paragraph(companyInfoRequestDto.name(), font);
-        title.setAlignment(Element.ALIGN_CENTER);
-        document.add(title);
-        document.add(Chunk.NEWLINE);
-
-        font = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
-        Paragraph address = new Paragraph(companyInfoRequestDto.address(), font);
-        address.setAlignment(Element.ALIGN_CENTER);
-        document.add(address);
-        document.add(Chunk.NEWLINE);
-
-        InputStream imageStream = ImageUtils.getImageStream(companyInfoRequestDto.companyShortName(),  imageId);
-
-        if (imageStream == null) {
-            throw new RuntimeException("Invalid CompanyShortName or ImageId");
-        }
-
+        InputStream imageStream = ImageUtils.getImageStream(imageId);
         Image image = Image.getInstance(imageStream.readAllBytes());
-        image.setAlignment(Element.ALIGN_CENTER);
         image.scaleToFit(100, 100);
-        document.add(image);
+        image.setAbsolutePosition(500, 720);
+        pdfStamper.getOverContent(1).addImage(image);
 
-        document.close();
+        pdfStamper.close();
+        pdfReader.close();
 
         return outputStream.toByteArray();
+
+    }
+
+    public byte[] generatePdfUsingApachePdfbox(Integer imageId, CompanyInfoRequestDto companyInfoRequestDto) throws DocumentException, IOException {
+        PDDocument document = new PDDocument();
+        PDPage page = new PDPage();
+        document.addPage(page);
+
+        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.TIMES_ROMAN,12);
+        contentStream.endText();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        document.save(outputStream);
+        return outputStream.toByteArray();
+
     }
 }
